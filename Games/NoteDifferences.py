@@ -1,6 +1,6 @@
 
-from NoteDictionary import NoteDictionary
-import multiprocessing, random
+import random
+from Games.NoteDictionary import NoteDictionary
 
 class NoteDifferences:
 
