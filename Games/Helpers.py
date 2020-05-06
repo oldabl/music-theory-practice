@@ -1,11 +1,29 @@
 
 from collections import OrderedDict
 import unicodedata
+from os import name, system
+
+
+
+def clearTerminal(): 
+    # for windows 
+    if name == 'nt': 
+        _ = system('cls') 
+    # for mac and linux(here, os.name is 'posix') 
+    else: 
+        _ = system('clear') 
+
+
+
+def printThanks():
+  print("Thanks for playing :)")
+  print("Sponsor us at https://github.com/oldabl/music-theory-practice <3")
+
 
 constnotes = OrderedDict([
   ("C" , ("C" , "Do"  )),
   ("C#", ("C#", "Do#" , "Csharp", "Do dièse")),
-  ("D" , ("D" , "Ré"  , "")),
+  ("D" , ("D" , "Ré"  )),
   ("D#", ("D#", "Ré#" , "Dsharp", "Ré dièse")),
   ("E" , ("E" , "Mi"  )),
   ("F" , ("F" , "Fa"  )),
