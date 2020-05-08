@@ -43,18 +43,18 @@ def printThanks():
 # Const ote dictionary
 # Will add into it all variants
 CONSTANT_NOTES = {
-  0:  (["C"],           ["Do"]),
-  1:  (["C#", "Csharp"],["Do#", "Do dièse"]),
-  2:  (["D"],           ["Ré"]),
-  3:  (["D#", "Dsharp"],["Ré#", "Ré dièse"]),
-  4:  (["E"],           ["Mi"]),
-  5:  (["F"],           ["Fa"]),
-  6:  (["F#", "Fsharp"],["Fa#", "Fa dièse"]),
-  7:  (["G"],           ["Sol"]),
-  8:  (["G#", "Gsharp"],["Sol#", "Sol dièse"]),
-  9:  (["A"],           ["La"]),
-  10: (["A#", "Asharp"],["La#", "La dièse"]),
-  11: (["B"],           ["Si"]),
+  0:  (["C"],                           ["Do"]),
+  1:  (["C#", "Csharp", "Db", "Dflat"], ["Do#",  "Do dièse",  "Réb",  "Ré bémol"]),
+  2:  (["D"],                           ["Ré"]),
+  3:  (["D#", "Dsharp", "Eb", "Eflat"], ["Ré#",  "Ré dièse",  "Mib",  "Mi bémol"]),
+  4:  (["E"],                           ["Mi"]),
+  5:  (["F"],                           ["Fa"]),
+  6:  (["F#", "Fsharp", "Gb", "Gflat"], ["Fa#",  "Fa dièse",  "Solb", "Sol bémol"]),
+  7:  (["G"],                           ["Sol"]),
+  8:  (["G#", "Gsharp", "Ab", "Aflat"], ["Sol#", "Sol dièse", "Lab",  "La bémol"]),
+  9:  (["A"],                           ["La"]),
+  10: (["A#", "Asharp", "Bb", "Bflat"], ["La#",  "La dièse",  "Sib",  "Si bémol"]),
+  11: (["B"],                           ["Si"]),
 }
 HOW_MANY_NOTES = len(CONSTANT_NOTES)
 
