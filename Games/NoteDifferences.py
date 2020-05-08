@@ -2,48 +2,52 @@
 import random
 import Games.Helpers as Helpers
 
-class NoteDifferences:
+class NoteDifferences(Helpers.Game):
 
   def __init__(self):
-    Helpers.clearTerminal()
-    self.notes = Helpers.NoteDictionary().getNotes()
+    super().__init__()
     print("\nWelcome to note differences game!")
 
   def play(self):
     answer = ""
-    
-    inarow = 0
-    bestscore = 0
 
     while answer != "q":
-      notenumber = random.randint(0, 11)
-      movement = random.randint(1, 2)
-      tones = random.randint(1, 2)
-      correctanswer = (notenumber + movement*tones) % len(self.notes)
-      correctnotevariants = self.notes[correctanswer]
+      notenumber = self.notedictionary.getRandomNoteNumber()
 
-      question = self.notes[notenumber][1]+" + "+str(movement) + " "
-      if tones == 1:
-        question += "semiton"
-      else: #if tones == 2
-        question += "ton"
+      movement = random.randint(1, 2 + int(self.score/6))
+      tonetype = random.randint(1, 2)
+
+      # At high score, starts adding substraction
+      plusorminus = 1 # addition
+      if self.score > 20:
+        plusorminus = random.randint(1, 2)
+
+      if plusorminus == 1:
+        noteshift = movement*tonetype
+        addchar = "+"
+      else: # plusorminus == 2
+        noteshift = -1*movement*tonetype
+        addchar = "-"
+
+      correctnotenumber = self.notedictionary.getNotePlusSemitonesNumber(notenumber, noteshift)
+      correctname = self.notedictionary.getNoteName(correctnotenumber)
+
+      question = self.notedictionary.getNoteName(notenumber)+" "+addchar+" "+str(movement) + " "
+      if tonetype == 1:
+        question += "semitone"
+      else: #if tonetype == 2
+        question += "tone"
       if movement > 1:
         question += "s"
       question += " = "
       answer = input("\n"+question)
       
-      if answer in correctnotevariants:
-        inarow += 1
-        print("Correct! "+str(inarow)+" in a row! It was indeed a "+correctnotevariants[1])
+      if answer in self.notedictionary.getNoteVariants(correctnotenumber):
+        self.handleScore(True)
+        print("Correct! "+str(self.score)+" in a row! It was indeed a "+correctname)
       else:
-        inarow = 0
-        print("WRONG! Actually it was a "+correctnotevariants[1])
-      
-      # Update best score
-      if inarow > bestscore:
-        bestscore = inarow
+        self.handleScore(False)
+        print("WRONG! Actually it was a "+correctname)
     
     # After loop
-    print("\nBest score was: "+str(bestscore))
-    Helpers.printThanks()
-
+    self.printBestScore()
