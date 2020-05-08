@@ -104,7 +104,7 @@ class NoteDictionary:
   def getRandomNoteNumber(self, includesharp=True):
     randomnotenumber = random.randint(0, len(self.notes)-1)
     if not includesharp and "#" in self.getNoteName(randomnotenumber):
-      return self.getRandomNoteNumber(includesharp)
+      return randomnotenumber-1
     else:
       return randomnotenumber
 

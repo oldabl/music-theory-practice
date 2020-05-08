@@ -43,7 +43,7 @@ class NotesOnThePiano(Helpers.Game):
     answer = ""
 
     while answer != "q":
-      notenumber = self.notedictionary.getRandomNoteNumber(False)
+      notenumber = self.notedictionary.getRandomNoteNumber(includesharp=False)
       if self.score > 12:
         notenumber = self.notedictionary.getRandomNoteNumber()
 
