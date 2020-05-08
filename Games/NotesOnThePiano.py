@@ -50,7 +50,6 @@ class NotesOnThePiano(Helpers.Game):
       notesecondposition = random.randint(0, 1)
 
       correctanswernoteposition = self.notePositions[notenumber] + notesecondposition * NOTE2_OFFSET
-      correctanswernotevariants = self.notedictionary.getNoteVariants(notenumber)
       correctnotename = self.notedictionary.getNoteName(notenumber)
 
       pinnotechar = '^'
@@ -63,7 +62,7 @@ class NotesOnThePiano(Helpers.Game):
       answer = input("What's this note? ")
       Helpers.cleanLinesAhead(1)
 
-      if answer in correctanswernotevariants:
+      if self.notedictionary.doesStringMatchNoteNumber(Helpers.noAccentsOrSpaces(answer), notenumber):
         self.handleScore(True)
         print("Correct! "+str(self.score)+" in a row! It was indeed a "+correctnotename)
       else:

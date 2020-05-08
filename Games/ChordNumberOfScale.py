@@ -49,7 +49,7 @@ class ChordNumberOfScale(Helpers.Game):
       question = "What's chord "+romannumberinfo[0]+" of major scale in key "+keyinfo[0]+"? "
       answer = input("\n"+question)
       
-      if answer in self.notedictionary.getNoteVariants(correctnotenumber):
+      if self.notedictionary.doesStringMatchNoteNumber(Helpers.noAccentsOrSpaces(answer), correctnotenumber):
         self.handleScore(True)
         print("Correct! "+str(self.score)+" in a row! It was "+correctnotename+ " indeed")
       else:

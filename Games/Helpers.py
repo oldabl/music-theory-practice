@@ -1,6 +1,6 @@
 
 from collections import OrderedDict
-import unicodedata, random, os, sys
+import unicodedata, random, os, sys, difflib
 from os import name, system
 
 
@@ -12,6 +12,14 @@ def clearTerminal():
     # for mac and linux(here, os.name is 'posix') 
     else: 
         _ = system('clear') 
+
+
+
+def noAccentsOrSpaces(string):
+  string = string.lower()
+  string = string.replace(" ", "")
+  string = ''.join((c for c in unicodedata.normalize('NFD', string) if unicodedata.category(c) != 'Mn'))
+  return string
 
 
 
@@ -116,6 +124,19 @@ class NoteDictionary:
       return self.getRandomNoteNumber(includesharp)
     else:
       return randomnotenumber
+
+  def doesStringMatchNoteNumber(self, trystring, notenumber):
+    bestratio = 0.0
+    trystring = trystring.replace("diese", "#")
+    trystring = trystring.replace("sharp", "#")
+    for value in self.getNoteVariants(notenumber):
+      ratio = difflib.SequenceMatcher(None, trystring, value).ratio()
+      if ratio > bestratio:
+        bestratio = ratio
+    # Look at ratio
+    if bestratio >= 0.75:
+      return True
+    return False # else
 
 
 

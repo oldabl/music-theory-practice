@@ -42,7 +42,7 @@ class NoteDifferences(Helpers.Game):
       question += " = "
       answer = input("\n"+question)
       
-      if answer in self.notedictionary.getNoteVariants(correctnotenumber):
+      if self.notedictionary.doesStringMatchNoteNumber(Helpers.noAccentsOrSpaces(answer), correctnotenumber):
         self.handleScore(True)
         print("Correct! "+str(self.score)+" in a row! It was indeed a "+correctname)
       else:
