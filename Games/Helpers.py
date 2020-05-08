@@ -73,16 +73,16 @@ class NoteDictionary:
   def initialiseDictionary(self):
     for (key, value) in CONSTANT_NOTES.items():
       if self.notetype == "traditional":
-        self.notes[key] = value[1]
+        self.notes[key] = value[1] + value[0]
       elif self.notetype == "alphabet":
-        self.notes[key] = value[0]
-    self.addVariants()
+        self.notes[key] = value[0] + value[1]
+    self.formatVariants()
 
-  def addVariants(self):
+  def formatVariants(self):
     for key in self.notes:
       tmplist = []
       for variant in self.notes[key]:
-        tmplist.extend(self.getAllVariants(variant))
+        tmplist.append(noAccentsOrSpaces(variant))
       tmplist = list(set(tmplist))
       self.notes[key].extend(tmplist)
     # for (key, value) in self.notes.items():
@@ -91,23 +91,6 @@ class NoteDictionary:
 
   def getNotes(self):
     return self.notes
-
-  def getAllVariants(self, variant):
-    resultlist = []
-    resultlist.extend(self.getSpaceVariants(variant))
-    resultlist.extend(self.getSpaceVariants(variant.lower()))
-    resultlist.extend(self.getSpaceVariants(variant.upper()))
-    return resultlist
-  def getSpaceVariants(self, variant):
-    resultlist = []
-    resultlist.extend(self.getAccentsVariants(variant))
-    resultlist.extend(self.getAccentsVariants(variant.replace(" ", "")))
-    return resultlist
-  def getAccentsVariants(self, variant):
-    resultlist = [variant]
-    variant = ''.join((c for c in unicodedata.normalize('NFD', variant) if unicodedata.category(c) != 'Mn'))
-    resultlist.append(variant)
-    return resultlist
   
   def getNotePlusSemitonesNumber(self, notenumber, numberofsemitones):
     return (notenumber+numberofsemitones)%len(self.notes)
@@ -127,14 +110,28 @@ class NoteDictionary:
 
   def doesStringMatchNoteNumber(self, trystring, notenumber):
     bestratio = 0.0
-    trystring = trystring.replace("diese", "#")
-    trystring = trystring.replace("sharp", "#")
+    # Will try replacing the diese or sharp with #
+    trystring1 = trystring
+    trystring1 = trystring1.replace("diese", "#")
+    trystring1 = trystring1.replace("sharp", "#")
+    # Will try replacing the # with sharp or diese
+    trystring2 = trystring
+    if self.notetype == "alphabet":
+      trystring2 = trystring2.replace("#", "sharp")
+    elif self.notetype == "traditional":
+      trystring2 = trystring2.replace("#", "diese")
+    # List of strings to try
+    trystrings = [trystring, trystring1, trystring2]
+    trystrings = list(set(trystrings))
+    # Check every try string on every variant
     for value in self.getNoteVariants(notenumber):
-      ratio = difflib.SequenceMatcher(None, trystring, value).ratio()
-      if ratio > bestratio:
-        bestratio = ratio
+      for trystring in trystrings:
+        ratio = difflib.SequenceMatcher(None, trystring, value).ratio()
+        if ratio > bestratio:
+          bestratio = ratio
+
     # Look at ratio
-    if bestratio >= 0.75:
+    if bestratio > 0.8:
       return True
     return False # else
 
