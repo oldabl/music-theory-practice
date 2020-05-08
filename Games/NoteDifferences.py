@@ -14,25 +14,29 @@ class NoteDifferences(Helpers.Game):
     while answer != "q":
       notenumber = self.notedictionary.getRandomNoteNumber()
 
+      # Pick movement degree (with difficulty handling)
       movement = random.randint(1, 2 + int(self.score/6))
-      tonetype = random.randint(1, 2)
+      tonetype = 1
+      if self.score > 17: # include tones
+        tonetype = random.randint(1, 2)
 
-      # At high score, starts adding substraction
+      # At high score, starts adding substraction (difficulty handling)
       plusorminus = 1 # addition
-      if self.score > 20:
+      if self.score > 26:
         plusorminus = random.randint(1, 2)
 
+      # Select right operation
       if plusorminus == 1:
         noteshift = movement*tonetype
-        addchar = "+"
+        operationchar = "+"
       else: # plusorminus == 2
         noteshift = -1*movement*tonetype
-        addchar = "-"
+        operationchar = "-"
 
       correctnotenumber = self.notedictionary.getNotePlusSemitonesNumber(notenumber, noteshift)
       correctname = self.notedictionary.getNoteName(correctnotenumber)
 
-      question = self.notedictionary.getNoteName(notenumber)+" "+addchar+" "+str(movement) + " "
+      question = self.notedictionary.getNoteName(notenumber)+" "+operationchar+" "+str(movement) + " "
       if tonetype == 1:
         question += "semitone"
       else: #if tonetype == 2
