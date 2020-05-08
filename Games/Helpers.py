@@ -73,9 +73,9 @@ class NoteDictionary:
   def initialiseDictionary(self):
     for (key, value) in CONSTANT_NOTES.items():
       if self.notetype == "traditional":
-        self.notes[key] = value[1] + value[0]
+        self.notes[key] = value[1]
       elif self.notetype == "alphabet":
-        self.notes[key] = value[0] + value[1]
+        self.notes[key] = value[0]
     self.formatVariants()
 
   def formatVariants(self):
@@ -89,6 +89,9 @@ class NoteDictionary:
     #   print(key)
     #   print(value)
 
+  def isSharp(self, notenumber):
+    return "#" in self.getNoteName(notenumber)
+
   def getNotes(self):
     return self.notes
   
@@ -98,8 +101,8 @@ class NoteDictionary:
   def getNoteVariants(self, notenumber):
     return self.notes[notenumber]
 
-  def getNoteName(self, notenumber):
-    return self.notes[notenumber][0]
+  def getNoteName(self, notenumber, suffix=""):
+    return self.notes[notenumber][0]+suffix
 
   def getRandomNoteNumber(self, includesharp=True):
     randomnotenumber = random.randint(0, len(self.notes)-1)
@@ -108,7 +111,7 @@ class NoteDictionary:
     else:
       return randomnotenumber
 
-  def doesStringMatchNoteNumber(self, trystring, notenumber):
+  def doesStringMatchNoteNumber(self, trystring, notenumber, suffix="", thresholdratio=0.86):
     bestratio = 0.0
     # Will try replacing the diese or sharp with #
     trystring1 = trystring
@@ -125,13 +128,14 @@ class NoteDictionary:
     trystrings = list(set(trystrings))
     # Check every try string on every variant
     for value in self.getNoteVariants(notenumber):
-      for trystring in trystrings:
-        ratio = difflib.SequenceMatcher(None, trystring, value).ratio()
+      value = value+suffix
+      for trys in trystrings:
+        ratio = difflib.SequenceMatcher(None, trys, value).quick_ratio()
         if ratio > bestratio:
           bestratio = ratio
 
     # Look at ratio
-    if bestratio > 0.8:
+    if bestratio >= thresholdratio:
       return True
     return False # else
 
