@@ -26,8 +26,9 @@ MINOR_SCALE = {
 class ChordNumberOfScale(Helpers.Game):
 
   def __init__(self):
-    super().__init__()
     print("\nWelcome to chord number of scale game!")
+    super().__init__()
+    self.setMaxDifficulty(360)
     self.printRevisions()
   
   def printRevisions(self):
@@ -48,46 +49,60 @@ class ChordNumberOfScale(Helpers.Game):
 
   def play(self):
     answer = ""
+    alwaysincludeminor = False
     
-    while answer != "q":
-      keynumber = self.notedictionary.getRandomNoteNumber()
-
-      # Pick a scale (difficulty handling)
-      majororminor = 0
-      if self.score > 15:
-        majororminor = random.randint(0,1)
-
-      # Select right scale
-      if majororminor == 0:
-        majorminorstring = "major"
-        scale = MAJOR_SCALE
+    self.printQuitInfo()
+    while answer != self.endGameString:
+      # Pick random key to start with
+      if self.ratioMaxDifficulty(3):
+        #Use sharps at high difficulty
+        keynumber = self.notedictionary.getRandomNoteNumber()
       else:
-        majorminorstring = "minor"
+        #Don't use sharps at low difficulty
+        maxnotenumber = int(1 + self.difficulty/10)
+        keynumber = self.notedictionary.getRandomNoteNumber(False, maxnotenumber)
+
+      # Pick a scale
+      if alwaysincludeminor:
+        majororminor = random.randint(0,3) #More chance to get minor now we know major well
+      else:
+        majororminor = 0 #Always major
+      if self.ratioMaxDifficulty(2):
+        alwaysincludeminor = True
+
+      # Select right scale according to pick
+      if majororminor == 0:
+        scale = MAJOR_SCALE
+        minorchar=""
+      else:
         scale = MINOR_SCALE
-      
+        minorchar="m"
+
+      # Key name from scale and key number
+      keyname = self.notedictionary.getNoteName(keynumber, suffix=minorchar)
+
       # Work out number of degrees we can do (difficulty handling)
-      numberofchoicesromannumber = 2 + int(self.score/6)
-      if numberofchoicesromannumber > len(scale):
-        numberofchoicesromannumber = len(scale)
-      romannumbernumber = random.randint(0, numberofchoicesromannumber-1)
-
+      romannumbernumber = random.randint(1, 7) - 1
       romannumberinfo = scale[romannumbernumber]
-      keyinfo = self.notedictionary.getNotes()[keynumber]
 
+      # Prepare answer
       correctnotenumber = self.notedictionary.getNotePlusSemitonesNumber(keynumber, romannumberinfo[1])
       correctnotename = self.notedictionary.getNoteName(correctnotenumber, suffix=romannumberinfo[2])
 
-      question = "What's chord "+romannumberinfo[0]+" of "+majorminorstring+" scale in key "+keyinfo[0]+"? "
-      answer = input("\n"+question)
-      if answer == "revision":
+      # Prepare question
+      question = "Chord "+romannumberinfo[0]+" of "+keyname+" scale? "
+      (answer, timetoanswer) = self.askQuestion("\n"+question)
+      if answer == "revisions":
         self.printRevisions()
+        continue
+      elif answer == self.endGameString:
         continue
       
       if self.notedictionary.doesStringMatchNoteNumber(Helpers.noAccentsOrSpaces(answer), correctnotenumber, suffix=romannumberinfo[2], thresholdratio=0.95):
-        self.handleScore(True)
+        self.handleAnswer(True, timetoanswer)
         print("Correct! "+str(self.score)+" in a row! It was "+correctnotename+ " indeed")
       else:
-        self.handleScore(False)
+        self.handleAnswer(False, timetoanswer)
         print("WRONG! Actually it was "+correctnotename)
         print('Type "revisions" to revise scales')
     

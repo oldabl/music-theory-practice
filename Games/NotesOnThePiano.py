@@ -26,11 +26,12 @@ NOTE_SPACE_POSITIONS = {
 NOTE2_OFFSET = 28
 
 class NotesOnThePiano(Helpers.Game):
+
   def __init__(self):
     super().__init__()
     print("\nWelcome to notes on the piano game!\n")
     self.notepositions = NOTE_SPACE_POSITIONS
-
+    self.setMaxDifficulty(30)
 
   def printPianoAndNoteSelected(self, notenumber, secondposition, goback):
     if self.notedictionary.isSharp(notenumber):
@@ -56,37 +57,41 @@ class NotesOnThePiano(Helpers.Game):
           sys.stdout.write(value[position])
       sys.stdout.write("\n")
       sys.stdout.flush()
-
   
   def play(self):
     answer = ""
     firstround = True
 
-    while answer != "q":
-      # Select note number (difficulty handling for sharps to appear)
-      notenumber = self.notedictionary.getRandomNoteNumber(includesharp=False)
-      if self.score >= 12:
+    self.printQuitInfo()
+    while answer != self.endGameString:
+      # Pick random note to start with
+      if self.ratioMaxDifficulty(3):
+        #Use sharps at high difficulty
         notenumber = self.notedictionary.getRandomNoteNumber()
+      else:
+        #Don't use sharps at low difficulty
+        notenumber = self.notedictionary.getRandomNoteNumber(includesharp=False)
 
       # Will print piano with note chosen
       notesecondposition = random.randint(0, 1)
       self.printPianoAndNoteSelected(notenumber, (notesecondposition==1), (firstround==False))
-      Helpers.cleanLinesAhead(1)
-      print()
+      Helpers.cleanLinesAhead(1, keep=True)
 
       # Deduct correct answer
       correctnotename = self.notedictionary.getNoteName(notenumber)
 
       # Let player play
       Helpers.cleanLinesAhead(1)
-      answer = input("What's this note? ")
+      (answer, timetoanswer) = self.askQuestion("What's this note? ")
+      if answer == self.endGameString:
+        continue
       Helpers.cleanLinesAhead(1)
 
       if self.notedictionary.doesStringMatchNoteNumber(Helpers.noAccentsOrSpaces(answer), notenumber):
-        self.handleScore(True)
+        self.handleAnswer(True, timetoanswer)
         print("Correct! "+str(self.score)+" in a row! It was indeed a "+correctnotename)
       else:
-        self.handleScore(False)
+        self.handleAnswer(False, timetoanswer)
         print("WRONG! Actually it was a "+correctnotename)
       
       Helpers.goBackUpLines(3)

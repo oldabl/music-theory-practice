@@ -2,55 +2,87 @@
 import random
 import Games.Helpers as Helpers
 
+# Game difficulty
+#maxsemitones = 24 (2 octaves)
+# -> maxtones = 24/2 = 12
+#semitones = 2+difficulty/6
+#maxdifficulty = (24-2)*6 = 132
 class NoteDifferences(Helpers.Game):
 
   def __init__(self):
     super().__init__()
     print("\nWelcome to note differences game!")
+    self.setMaxDifficulty(132)
 
   def play(self):
     answer = ""
 
-    while answer != "q":
-      notenumber = self.notedictionary.getRandomNoteNumber()
+    self.printQuitInfo()
+    while answer != self.endGameString:
+      # Pick random note to start with
+      if self.ratioMaxDifficulty(4):
+        #Use sharps at high difficulty
+        notenumber = self.notedictionary.getRandomNoteNumber()
+      else:
+        #Don't use sharps at low difficulty
+        notenumber = self.notedictionary.getRandomNoteNumber(False)
 
-      # Pick movement degree (with difficulty handling)
-      movement = random.randint(1, 2 + int(self.score/6))
-      tonetype = 1
-      if self.score > 17: # include tones
+      # Pick number of semitones to put on top
+      semitonesnumber = random.randint(1, int(2 + self.difficulty/6))
+      if self.ratioMaxDifficulty(3):
+        #Include tones at high difficulty
         tonetype = random.randint(1, 2)
+      else:
+        #Only use semitones
+        tonetype = 1
 
-      # At high score, starts adding substraction (difficulty handling)
-      plusorminus = 1 # addition
-      if self.score > 26:
+      # Pick addition or substraction
+      if self.ratioMaxDifficulty(2):
+        #Include substraction at high difficulty
         plusorminus = random.randint(1, 2)
+      else:
+        #Addition only
+        plusorminus = 1
 
-      # Select right operation
-      if plusorminus == 1:
-        noteshift = movement*tonetype
+      # Prepare variables for question
+      if plusorminus == 1: # Addition
+        noteshift = semitonesnumber
         operationchar = "+"
-      else: # plusorminus == 2
-        noteshift = -1*movement*tonetype
+      else: # Substraction
+        noteshift = -1*semitonesnumber
         operationchar = "-"
+      # Remove (semi)tones trailing 0 if there is one
+      questiontones = semitonesnumber/tonetype
+      if int(questiontones) == questiontones:
+        questiontones = int(questiontones)
 
-      correctnotenumber = self.notedictionary.getNotePlusSemitonesNumber(notenumber, noteshift)
-      correctname = self.notedictionary.getNoteName(correctnotenumber)
-
-      question = self.notedictionary.getNoteName(notenumber)+" "+operationchar+" "+str(movement) + " "
+      # Question
+      question = self.notedictionary.getNoteName(notenumber)+" "
+      question += operationchar+" "
+      question += str(questiontones)+" "
       if tonetype == 1:
         question += "semitone"
       else: #if tonetype == 2
         question += "tone"
-      if movement > 1:
+      if questiontones > 1:
         question += "s"
       question += " = "
-      answer = input("\n"+question)
+
+      # Player plays
+      (answer, timetoanswer) = self.askQuestion(question)
+      if answer == self.endGameString:
+        continue
+
+      # Actual answer
+      correctnotenumber = self.notedictionary.getNotePlusSemitonesNumber(notenumber, noteshift)
+      correctname = self.notedictionary.getNoteName(correctnotenumber)
       
+      # Check if player got it right
       if self.notedictionary.doesStringMatchNoteNumber(Helpers.noAccentsOrSpaces(answer), correctnotenumber):
-        self.handleScore(True)
+        self.handleAnswer(True, timetoanswer)
         print("Correct! "+str(self.score)+" in a row! It was indeed a "+correctname)
       else:
-        self.handleScore(False)
+        self.handleAnswer(False, timetoanswer)
         print("WRONG! Actually it was a "+correctname)
     
     # After loop
