@@ -19,7 +19,7 @@ if __name__ == "__main__":
 
   Helpers.clearTerminal()
   choice = ""
-  while choice != "q":
+  while choice not in ("q", "quit"):
     Helpers.cleanLinesAhead(6)
     print()
     print("1. Note differences")
