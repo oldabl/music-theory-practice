@@ -1,6 +1,6 @@
 
 from collections import OrderedDict
-import unicodedata, random, os, sys, difflib
+import unicodedata, random, os, sys, difflib, time
 from os import name, system
 
 
@@ -25,12 +25,15 @@ def noAccentsOrSpaces(string):
 
 LINE_CLEAN = " "*os.get_terminal_size()[0]+"\r"
 UP_ONE_LINE = "\033[F"
-def cleanLinesAhead(numberoflines):
+def cleanLinesAhead(numberoflines, keep=False):
   sys.stdout.write( (LINE_CLEAN+"\n") * numberoflines)
-  sys.stdout.write( UP_ONE_LINE * numberoflines)
+  if not keep:
+    goBackUpLines(numberoflines)
+  sys.stdout.flush()
 
 def goBackUpLines(numberoflines):
   sys.stdout.write( UP_ONE_LINE * numberoflines)
+  sys.stdout.flush()
 
 def printThanks():
   print()
@@ -104,8 +107,8 @@ class NoteDictionary:
   def getNoteName(self, notenumber, suffix=""):
     return self.notes[notenumber][0]+suffix
 
-  def getRandomNoteNumber(self, includesharp=True):
-    randomnotenumber = random.randint(0, len(self.notes)-1)
+  def getRandomNoteNumber(self, includesharp=True, maxnotenumber=12):
+    randomnotenumber = random.randint(0, min(len(self.notes), maxnotenumber)-1)
     if not includesharp and "#" in self.getNoteName(randomnotenumber):
       return randomnotenumber-1
     else:
@@ -150,8 +153,33 @@ class Game:
   def __init__(self):
     clearTerminal()
     self.notedictionary = NoteDictionary()
-    self.score = 0
+    self.endGameString = "quit"
     self.bestscore = 0
+    self.score = 0
+    self.difficulty = 0
+    self.maxdifficulty = None
+    self.missedinarow = 0
+    self.gotinarow = 0
+
+  def printQuitInfo(self):
+    print("To quit, type '"+self.endGameString+"'\n")
+
+  def handleAnswer(self, correctanswer, timetoanswer = 0):
+    if correctanswer and timetoanswer > 10:
+      #10+ seconds to answer right, no increase in difficulty and row
+      pass
+    else:
+      self.handleInARow(correctanswer)
+      self.handleDifficulty(correctanswer)
+    self.handleScore(correctanswer)
+  
+  def handleInARow(self, correctanswer):
+    if correctanswer:
+      self.gotinarow += 1
+      self.missedinarow = 0
+    else:
+      self.gotinarow = 0
+      self.missedinarow += 1
 
   def handleScore(self, correctanswer):
     if correctanswer:
@@ -161,6 +189,34 @@ class Game:
     # Update best score
     if self.score > self.bestscore:
       self.bestscore = self.score
+
+  def handleDifficulty(self, correctanswer):
+    if correctanswer:
+      byhowmuch = min(1+self.gotinarow*0.025, 1.2)
+      self.difficulty += 1
+      self.difficulty *= byhowmuch
+    else:
+      byhowmuch = max(1-self.missedinarow*0.05, 0.1)
+      self.difficulty *= byhowmuch
+    # Make sure we don't go over or under
+    if self.maxdifficulty:
+      self.difficulty = min(self.difficulty, self.maxdifficulty)
+    self.difficulty = max(self.difficulty, 0)
+    print(int(self.difficulty), end='')
+
+  def reachedMaxDifficulty(self):
+    self.maxdifficulty = self.difficulty
+
+  def setMaxDifficulty(self, max):
+    self.maxdifficulty = max
+
+  def ratioMaxDifficulty(self, ratio):
+    return self.difficulty >= self.maxdifficulty/ratio
+  
+  def askQuestion(self, question):
+    start = time.time()
+    answer = input(question)
+    return (answer, time.time()-start)
 
   def printBestScore(self):
     print("Your best score on this session was: "+str(self.bestscore))
